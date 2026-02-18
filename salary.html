@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Predictor</title>
+    <style>
+        :root {
+            --color-bg-base: #0f172a;
+            --color-bg-surface: #1e293b;
+            --color-text-primary: #f1f5f9;
+            --color-text-secondary: #cbd5e1;
+            --color-primary: #38bdf8;
+            --color-primary-hover: #0ea5e9;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg-base);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: var(--color-bg-surface);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 32px; color: var(--color-primary); margin-bottom: 8px; }
+        .header p { color: var(--color-text-secondary); font-size: 16px; }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--color-primary);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { margin-bottom: 24px; }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--color-bg-base);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 8px;
+            color: var(--color-text-primary);
+            font-size: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--color-primary);
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .skills-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .skill-tag {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--color-primary);
+        }
+
+        .result-card {
+            display: none;
+            margin-top: 30px;
+            padding: 24px;
+            background: var(--color-bg-base);
+            border: 2px solid var(--color-success);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .result-card.show { display: block; animation: slideIn 0.4s ease; }
+        .salary-amount { font-size: 42px; font-weight: 700; color: var(--color-primary); margin-bottom: 12px; }
+        .insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-top: 20px; }
+        .insight-box { background: var(--color-bg-surface); padding: 16px; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.2); }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+        <div class="header">
+            <h1>💰 Salary Predictor</h1>
+            <p>Get accurate salary insights based on your profile</p>
+        </div>
+
+        <form id="salaryForm">
+            <div class="form-group">
+                <label for="role">Job Role</label>
+                <select id="role" required>
+                    <option value="">Select your role</option>
+                    <option value="Data Scientist">Data Scientist</option>
+                    <option value="Analytics Engineer">Analytics Engineer</option>
+                    <option value="Business Analyst">Business Analyst</option>
+                    <option value="Data Analyst">Data Analyst</option>
+                    <option value="BI Analyst">BI Analyst</option>
+                    <option value="Senior Data Analyst">Senior Data Analyst</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="experience">Years of Experience</label>
+                    <input type="number" id="experience" min="0" max="50" step="0.5" placeholder="e.g., 3.5" required>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" placeholder="e.g., Bengaluru" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="workMode">Work Mode</label>
+                    <select id="workMode" required>
+                        <option value="Remote">Remote</option>
+                        <option value="Onsite">Onsite</option>
+                        <option value="Hybrid">Hybrid</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="employmentType">Employment Type</label>
+                    <select id="employmentType" required>
+                        <option value="Full-time">Full-time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Internship">Internship</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="skills">Skills</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="skillInput" placeholder="Enter a skill (e.g., Python)">
+                    <button type="button" style="width: 80px;" onclick="addSkill()">Add</button>
+                </div>
+                <div class="skills-list" id="skillsList"></div>
+            </div>
+
+            <button type="submit" class="btn">🔍 Predict Salary</button>
+        </form>
+
+        <div class="result-card" id="resultCard">
+            <h3>Estimated Salary Range</h3>
+            <div class="salary-amount" id="salaryAmount">₹0</div>
+            <div id="salaryRange" style="color: var(--color-text-secondary); margin-bottom: 20px;"></div>
+
+            <div class="insights">
+                <div class="insight-box">
+                    <div style="font-size: 12px;">Market Avg</div>
+                    <div class="value" id="marketAvg">₹0</div>
+                </div>
+                <div class="insight-box">
+                    <div style="font-size: 12px;">Your Position</div>
+                    <div class="value" id="position">Competitive</div>
+                </div>
+                <div class="insight-box">
+                    <div style="font-size: 12px;">Growth Potential</div>
+                    <div class="value" id="growth">High</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let skills = [];
+
+        function addSkill() {
+            const input = document.getElementById('skillInput');
+            const val = input.value.trim();
+            if (val && !skills.includes(val)) {
+                skills.push(val);
+                updateSkills();
+                input.value = '';
+            }
+        }
+
+        function updateSkills() {
+            document.getElementById('skillsList').innerHTML = skills.map((s, i) =>
+                `<div class="skill-tag">${s} <span onclick="skills.splice(${i},1);updateSkills()" style="cursor:pointer">×</span></div>`
+            ).join('');
+        }
+
+        function displayResults(val) {
+            const card = document.getElementById('resultCard');
+            card.classList.add('show');
+
+            // Format numbers to Lakhs (LPA)
+            const num = parseFloat(val);
+            document.getElementById('salaryAmount').textContent = `₹${num.toFixed(1)} LPA`;
+            document.getElementById('salaryRange').textContent = `Range: ₹${(num*0.9).toFixed(1)}L - ₹${(num*1.1).toFixed(1)}L`;
+            document.getElementById('marketAvg').textContent = `₹${(num*0.95).toFixed(1)}L`;
+
+            // Scroll into view
+            card.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.getElementById('salaryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(skills.length === 0) return alert("Add at least one skill");
+
+            const payload = {
+                role: document.getElementById('role').value,
+                location: document.getElementById('location').value,
+                work_mode: document.getElementById('workMode').value,
+                employment_type: document.getElementById('employmentType').value,
+                experience_years: parseFloat(document.getElementById('experience').value),
+                skills: skills.join("|")
+            };
+
+            try {
+                const res = await fetch("https://salary-predictor-backend-lv48.onrender.com/predict_salary", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if(data.salary) displayResults(data.salary);
+                else alert("Error: " + data.error);
+            } catch (err) {
+                console.error(err);
+                alert("Server connection failed.");
+            }
+        });
+    </script>
+</body>
+</html>

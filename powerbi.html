@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium PDF Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.mjs" type="module"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --secondary-text: #64748b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Header Styling with Navigation */
+        header {
+            width: 100%;
+            background: var(--card-bg);
+            padding: 1.5rem 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative; /* Allows positioning of the back button */
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; color: var(--primary-color); }
+        #dynamicHeading { margin: 0.5rem 0 0 0; font-weight: 300; color: var(--secondary-text); }
+
+        /* Viewer Container */
+        .viewer-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            margin-bottom: 5rem; /* Space for the floating controls */
+        }
+
+        canvas {
+            border-radius: 4px;
+            max-width: 100%;
+            height: auto !important;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Floating Modern Controls */
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #e2e8f0;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover:not(:disabled) { background-color: #1d4ed8; transform: translateY(-1px); }
+        .nav-btn:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+
+        #pageInfo { font-size: 0.9rem; font-weight: 600; color: #475569; min-width: 100px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+
+        <h1>Report Viewer</h1>
+        <h2 id="dynamicHeading">Initializing...</h2>
+    </header>
+
+    <div class="viewer-container">
+        <canvas id="pdfViewer"></canvas>
+    </div>
+
+    <div class="controls">
+        <button id="prev" class="nav-btn">Previous</button>
+        <span id="pageInfo"></span>
+        <button id="next" class="nav-btn">Next Page</button>
+    </div>
+
+    <script type="module">
+        import * as pdfjsLib from 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.min.mjs';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.7.76/pdf.worker.min.mjs';
+
+        const url = 'dashboard.pdf';
+        let pdfDoc = null;
+        let pageNum = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+
+        const pdfViewer = document.getElementById('pdfViewer');
+        const pageNumElement = document.getElementById('pageInfo');
+        const dynamicHeading = document.getElementById('dynamicHeading');
+        const prevButton = document.getElementById('prev');
+        const nextButton = document.getElementById('next');
+
+        function updateHeading(num) {
+            const sections = {
+                1: "Executive Summary",
+                2: "Financial Performance",
+                3: "Regional Growth Metrics",
+                4: "Future Forecasts"
+            };
+            dynamicHeading.textContent = sections[num] || `Section ${num}`;
+        }
+
+        async function renderPage(num) {
+            pageRendering = true;
+            updateHeading(num);
+            pageNumElement.textContent = `Page ${num} / ${pdfDoc.numPages}`;
+
+            prevButton.disabled = num <= 1;
+            nextButton.disabled = num >= pdfDoc.numPages;
+
+            const page = await pdfDoc.getPage(num);
+            const viewport = page.getViewport({ scale: 1.5 });
+            const ctx = pdfViewer.getContext('2d');
+
+            pdfViewer.height = viewport.height;
+            pdfViewer.width = viewport.width;
+
+            const renderContext = { canvasContext: ctx, viewport: viewport };
+            await page.render(renderContext).promise;
+
+            pageRendering = false;
+            if (pageNumPending !== null) {
+                renderPage(pageNumPending);
+                pageNumPending = null;
+            }
+        }
+
+        pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+            pdfDoc = pdfDoc_;
+            renderPage(pageNum);
+        }).catch(err => {
+            dynamicHeading.textContent = "Document not found";
+            console.error(err);
+        });
+
+        function queueRenderPage(num) {
+            if (pageRendering) { pageNumPending = num; }
+            else { renderPage(num); }
+        }
+
+        prevButton.onclick = () => { if (pageNum > 1) { pageNum--; queueRenderPage(pageNum); } };
+        nextButton.onclick = () => { if (pageNum < pdfDoc.numPages) { pageNum++; queueRenderPage(pageNum); } };
+    </script>
+</body>
+</html>

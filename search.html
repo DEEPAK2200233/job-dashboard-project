@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Search</title>
+    <style>
+        :root {
+            --color-bg-base: #0f172a;
+            --color-bg-surface: #1e293b;
+            --color-text-primary: #f1f5f9;
+            --color-text-secondary: #cbd5e1;
+            --color-primary: #38bdf8;
+            --color-primary-hover: #0ea5e9;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg-base);
+            color: var(--color-text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--color-primary);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            transform: translateX(-4px);
+        }
+
+        .header {
+            background: var(--color-bg-surface);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--color-text-secondary);
+            font-size: 16px;
+        }
+
+        .search-section {
+            background: var(--color-bg-surface);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            padding: 12px 16px;
+            background: var(--color-bg-base);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 8px;
+            color: var(--color-text-primary);
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            background: var(--color-primary);
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--color-bg-base);
+            color: var(--color-text-primary);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--color-primary);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .button-group .btn {
+            flex: 1;
+            margin-top: 0;
+        }
+
+        .results-section {
+            background: var(--color-bg-surface);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .results-header h2 {
+            font-size: 24px;
+            color: var(--color-primary);
+        }
+
+        .results-count {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--color-text-secondary);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(56, 189, 248, 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .job-card {
+            background: var(--color-bg-base);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .job-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 8px 24px rgba(56, 189, 248, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .job-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: 8px;
+        }
+
+        .job-company {
+            font-size: 16px;
+            color: var(--color-text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .job-location {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+        }
+
+        .job-salary {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-success);
+        }
+
+        .job-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .detail-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--color-primary);
+        }
+
+        .job-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .skill-tag {
+            padding: 6px 12px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--color-success);
+        }
+
+        .job-description {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .job-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .job-posted {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+        }
+
+        .btn-apply {
+            padding: 10px 24px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .no-results-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .no-results h3 {
+            font-size: 20px;
+            color: var(--color-text-primary);
+            margin-bottom: 12px;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .job-header {
+                flex-direction: column;
+            }
+
+            .job-salary {
+                margin-top: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+
+        <div class="header">
+            <h1>🔍 Job Search</h1>
+            <p>Find your dream job with advanced filters</p>
+        </div>
+
+        <div class="search-section">
+            <form id="searchForm">
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label for="jobTitle">Job Title / Keywords</label>
+                        <input type="text" id="jobTitle" placeholder="e.g., Software Engineer">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" placeholder="e.g., Bangalore">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jobType">Job Type</label>
+                        <select id="jobType">
+                            <option value="">Any Type</option>
+                            <option value="full-time">Full Time</option>
+                            <option value="part-time">Part Time</option>
+                            <option value="contract">Contract</option>
+                            <option value="remote">Remote</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="minSalary">Minimum Salary (LPA)</label>
+                        <input type="number" id="minSalary" placeholder="e.g., 5" min="0">
+                    </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn">🔍 Search Jobs</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="results-section">
+            <div class="results-header">
+                <h2>Job Results</h2>
+                <span class="results-count" id="resultsCount">0 jobs found</span>
+            </div>
+
+            <div id="errorMessage"></div>
+
+            <div id="loadingState" class="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Searching for jobs...</p>
+            </div>
+
+            <div id="jobsList">
+                <div class="no-results">
+                    <div class="no-results-icon">📋</div>
+                    <h3>Start Your Search</h3>
+                    <p>Use the filters above to find relevant job opportunities</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FastAPI Backend URL - Update this with your actual backend URL
+        const API_URL = 'https://salary-predictor-backend-lv48.onrender.com/api/jobs';
+
+        // Handle form submission
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get filter values
+            const filters = {
+                jobTitle: document.getElementById('jobTitle').value.trim(),
+                location: document.getElementById('location').value.trim(),
+                minSalary: document.getElementById('minSalary').value,
+            };
+
+            // Show loading state
+            showLoading(true);
+            clearError();
+
+            try {
+                // Build query parameters
+                const params = new URLSearchParams();
+                Object.keys(filters).forEach(key => {
+                    if (filters[key]) {
+                        params.append(key, filters[key]);
+                    }
+                });
+
+                // Make API request
+                const response = await fetch(`${API_URL}?${params.toString()}`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch jobs');
+                }
+
+                const data = await response.json();
+                displayJobs(data.jobs || data);
+
+            } catch (error) {
+                console.error('Error fetching jobs:', error);
+                showError('Unable to fetch jobs. Please check if the backend is running.');
+                displayJobs([]);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Display jobs
+        function displayJobs(jobs) {
+            const jobsList = document.getElementById('jobsList');
+            const resultsCount = document.getElementById('resultsCount');
+
+            resultsCount.textContent = `${jobs.length} job${jobs.length !== 1 ? 's' : ''} found`;
+
+            if (jobs.length === 0) {
+                jobsList.innerHTML = `
+                    <div class="no-results">
+                        <div class="no-results-icon">😕</div>
+                        <h3>No Jobs Found</h3>
+                        <p>Try adjusting your filters or search criteria</p>
+                    </div>
+                `;
+                return;
+            }
+
+            jobsList.innerHTML = jobs.map(job => `
+                <div class="job-card">
+                    <div class="job-header">
+                        <div>
+                            <div class="job-title">${escapeHtml(job.title || job.jobTitle || 'Job Title')}</div>
+                            <div class="job-company">${escapeHtml(job.company || 'Company Name')}</div>
+                            <div class="job-location">📍 ${escapeHtml(job.location || 'Location')}</div>
+                        </div>
+                        <div class="job-salary">
+                            ${job.salary || job.salaryRange ? '💰 ' + escapeHtml(job.salary || job.salaryRange) : ''}
+                        </div>
+                    </div>
+
+                    <div class="job-details">
+                        ${job.experience ? `<span class="detail-badge">📅 ${escapeHtml(job.experience)}</span>` : ''}
+                        ${job.jobType ? `<span class="detail-badge">💼 ${escapeHtml(job.jobType)}</span>` : ''}
+                        ${job.workMode ? `<span class="detail-badge">🏢 ${escapeHtml(job.workMode)}</span>` : ''}
+                    </div>
+
+                    ${job.skills && job.skills.length > 0 ? `
+                        <div class="job-skills">
+                            ${(Array.isArray(job.skills) ? job.skills : job.skills.split(',')).map(skill => 
+                                `<span class="skill-tag">${escapeHtml(skill.trim())}</span>`
+                            ).join('')}
+                        </div>
+                    ` : ''}
+
+                    ${job.description ? `
+                        <div class="job-description">
+                            ${escapeHtml(job.description.substring(0, 200))}${job.description.length > 200 ? '...' : ''}
+                        </div>
+                    ` : ''}
+
+                    <div class="job-footer">
+                        <span class="job-posted">
+                            ${job.postedDate ? '🕐 Posted ' + escapeHtml(job.postedDate) : ''}
+                        </span>
+                        <button class="btn btn-apply" onclick="applyJob('${job.id || job.jobId || ''}')">
+                            Apply Now →
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Show/hide loading state
+        function showLoading(show) {
+            document.getElementById('loadingState').style.display = show ? 'block' : 'none';
+            document.getElementById('jobsList').style.display = show ? 'none' : 'block';
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.innerHTML = `<div class="error-message">${escapeHtml(message)}</div>`;
+        }
+
+        // Clear error message
+        function clearError() {
+            document.getElementById('errorMessage').innerHTML = '';
+        }
+
+        // Clear all filters
+        function clearFilters() {
+            document.getElementById('searchForm').reset();
+            document.getElementById('jobsList').innerHTML = `
+                <div class="no-results">
+                    <div class="no-results-icon">📋</div>
+                    <h3>Start Your Search</h3>
+                    <p>Use the filters above to find relevant job opportunities</p>
+                </div>
+            `;
+            document.getElementById('resultsCount').textContent = '0 jobs found';
+        }
+
+        // Apply to job
+        function applyJob(jobId) {
+            alert(`Applying to job ID: ${jobId}\n\nThis would redirect to the application page or open application form.`);
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
