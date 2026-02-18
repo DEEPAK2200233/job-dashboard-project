@@ -147,7 +147,7 @@ async function analyze() {
 
     try {
         // Replace with your actual endpoint
-        const res = await fetch(`https://salary-predictor-backend-lv48.onrender.com/api/skill-gap?role=${encodeURIComponent(role)}&user_skills=${encodeURIComponent(skills)}`);
+        const res = await fetch(`https://salary-predictor-backend-lv48.onrender.com/api/skills?role=${encodeURIComponent(role)}&user_skills=${encodeURIComponent(skills)}`);
 
         if (!res.ok) throw new Error("Server error");
 
@@ -173,3 +173,4 @@ async function analyze() {
 </body>
 
 </html>
+
