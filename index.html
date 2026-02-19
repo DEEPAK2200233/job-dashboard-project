@@ -225,6 +225,11 @@
             
             <form id="signup">
                 <div class="form-group">
+                    <label for="signupName">Full Name</label>
+                    <input type="text" id="signupName" required placeholder="Enter your name">
+                </div>
+                
+                <div class="form-group">
                     <label for="signupEmail">Email Address</label>
                     <input type="email" id="signupEmail" required placeholder="you@example.com">
                 </div>
@@ -342,7 +347,8 @@
                     body: JSON.stringify({
                         action: 'signup',
                         email: email,
-                        password: password
+                        password: password,
+                        name:name
                     })
                 });
                 
@@ -381,6 +387,7 @@
 
                 if (validUser) {
                     sessionStorage.setItem('userEmail', email);
+                    sessionStorage.setItem('userName', validUser[2]);
                     // Using your logic:
                     showMessage('loginMessage', 'Login successful! Redirecting...', 'success');
                     setTimeout(() => {
