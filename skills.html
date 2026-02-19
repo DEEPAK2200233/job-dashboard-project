@@ -18,9 +18,31 @@
             background-color: var(--bg);
             color: var(--text);
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* Changed to column to handle header/container flow */
+            align-items: center;
             padding: 40px 20px;
             margin: 0;
+        }
+
+        /* NEW: Back Button Styling */
+        .back-nav {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        .btn-secondary {
+            text-decoration: none;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+
+        .btn-secondary:hover {
+            color: var(--text);
         }
 
         .container {
@@ -67,7 +89,7 @@
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin-top: 30px;
-            display: none; /* Hidden until search */
+            display: none; 
         }
 
         .card {
@@ -78,9 +100,7 @@
         }
 
         h3 { font-size: 0.9rem; text-transform: uppercase; color: #94a3b8; margin-top: 0; }
-
         ul { list-style: none; padding: 0; margin: 0; }
-
         li {
             padding: 8px 12px;
             margin-bottom: 6px;
@@ -91,7 +111,6 @@
             align-items: center;
         }
 
-        /* Gap skills look different */
         #gapSkills li { background: rgba(244, 63, 94, 0.1); color: #fb7185; }
         #gapSkills li::before { content: '✕'; margin-right: 8px; font-weight: bold; }
         #topSkills li::before { content: '✓'; margin-right: 8px; color: #4ade80; }
@@ -106,6 +125,12 @@
     </style>
 </head>
 <body>
+
+<nav class="back-nav">
+    <a href="dashboard.html" class="btn-secondary">
+        <span>←</span> Back to Dashboard
+    </a>
+</nav>
 
 <div class="container">
     <h2>Skill Gap Analysis</h2>
@@ -140,20 +165,17 @@ async function analyze() {
 
     if(!role || !skills) return alert("Please fill in both fields!");
 
-    // UI State: Loading
     btn.disabled = true;
     loader.style.display = "block";
     results.style.display = "none";
 
     try {
-        // Replace with your actual endpoint
         const res = await fetch(`https://salary-predictor-backend-lv48.onrender.com/api/skills?role=${encodeURIComponent(role)}&user_skills=${encodeURIComponent(skills)}`);
 
         if (!res.ok) throw new Error("Server error");
 
         const data = await res.json();
 
-        // Update UI
         document.getElementById("topSkills").innerHTML =
             data.top_skills.map(s => `<li>${s}</li>`).join("");
 
@@ -171,6 +193,4 @@ async function analyze() {
 </script>
 
 </body>
-
 </html>
-
