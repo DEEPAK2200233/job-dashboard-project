@@ -286,16 +286,20 @@
         document.addEventListener('DOMContentLoaded', () => {
             // 1. User Session Management
             const userDisplay = document.getElementById('userDisplay');
+            const storedName = sessionStorage.getItem('userName');
             const storedEmail = sessionStorage.getItem('userEmail');
             
             // Simple username extraction from email (for demo purposes)
-            if (storedEmail) {
+            if (storedName) {
+        // Use the actual name from Google Sheets
+                userDisplay.textContent = storedName;
+            } else if (storedEmail) {
+        // Fallback to email extraction if name is missing
                 const username = storedEmail.split('@')[0];
                 userDisplay.textContent = username.charAt(0).toUpperCase() + username.slice(1);
             } else {
                 userDisplay.textContent = 'Guest';
             }
-
             // 2. Logout Functionality
             document.getElementById('logoutBtn').addEventListener('click', () => {
                 showToast('Logging out...', 'neutral');
