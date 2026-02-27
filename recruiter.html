@@ -262,7 +262,7 @@ async function runAIRecruiter(){
     document.getElementById("loadingText").innerText = "Running AI Matching...";
 
     try{
-        const response = await fetch("https://salary-predictor-backend-lv48.onrender.com/match",{
+        const response = await fetch("https://salary-predictor-backend-lv48.onrender.com/match_candidates",{
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify({
@@ -302,4 +302,5 @@ function displayAIResults(results){
 </body>
 
 </html>
+
 
