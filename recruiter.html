@@ -254,54 +254,64 @@ function updateDashboard(){
 }
 
 /* REAL ML BACKEND CALL */
-async function runAIRecruiter(){
-
+/* CORRECTED FUNCTIONS */
+async function runAIRecruiter() {
     const role = document.getElementById("roleInput").value.trim();
-    if(!role) return alert("Enter job role");
+    if (!role) return alert("Enter job role");
 
-    document.getElementById("loadingText").innerText = "Running AI Matching...";
+    document.getElementById("loadingText").innerText = "Running AI Matching (Backend may take 30s to wake up)...";
 
-    try{
-        const response = await fetch("https://salary-predictor-backend-lv48.onrender.com/api/match_candidates",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({
-                role:role,
-                candidates:originalData
+    try {
+        // 1. Corrected URL (added /api/)
+        const response = await fetch("https://salary-predictor-backend-lv48.onrender.com/api/match_candidates", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                role: role,
+                candidates: originalData
             })
         });
 
-        const results = await response.json();
-        displayAIResults(results);
+        if (!response.ok) throw new Error("Server responded with error");
+
+        const data = await response.json();
+        
+        // 2. Pass data.matches (the actual array) to the display function
+        displayAIResults(data.matches || []);
 
         document.getElementById("loadingText").innerText = "";
     }
-    catch(err){
+    catch (err) {
         document.getElementById("loadingText").innerText = "";
-        alert("Backend not running. Start FastAPI server.");
+        console.error("Connection Error:", err);
+        alert("Could not connect to Render. If it's been a while, the server is likely 'waking up'. Please wait 30 seconds and try again.");
     }
 }
 
-function displayAIResults(results){
+function displayAIResults(results) {
     const table = document.getElementById("aiResultsTable");
+    table.innerHTML = ""; // Clear old results
 
-    if(results.length === 0){
+    if (!results || results.length === 0) {
         table.innerHTML = "<tr><td>No matches found</td></tr>";
         return;
     }
 
+    // Get headers from the first candidate object
     const headers = Object.keys(results[0]);
 
-    table.innerHTML = `<tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr>`;
-    table.innerHTML += results.map(r=>
-        `<tr>${headers.map(h=>`<td>${r[h]}</td>`).join("")}</tr>`
+    table.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
+    table.innerHTML += results.map(r =>
+        `<tr>${headers.map(h => `<td>${r[h] !== undefined ? r[h] : ''}</td>`).join("")}</tr>`
     ).join("");
 }
+    
 </script>
 
 </body>
 
 </html>
+
 
 
 
