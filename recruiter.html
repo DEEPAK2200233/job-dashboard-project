@@ -1,449 +1,347 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HR Intel | AI Recruitment System</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Intel | AI Recruitment System</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-        :root {
-            --primary: #00f5d4;
-            --secondary: #9b5de5;
-            --bg-dark: #0f172a;
-            --sidebar-width: 260px;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --danger: #ff4d4d;
-        }
+<style>
+:root {
+    --primary: #00f5d4;
+    --secondary: #9b5de5;
+    --bg-dark: #0f172a;
+    --sidebar-width: 260px;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --danger: #ff4d4d;
+}
 
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg-dark);
-            color: #f8fafc;
-            margin: 0;
-            display: flex;
-            min-height: 100vh;
-        }
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg-dark);
+    color: #f8fafc;
+    margin: 0;
+    display: flex;
+    min-height: 100vh;
+}
 
-        /* Sidebar Styling */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: #1e293b;
-            height: 100vh;
-            position: fixed;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid rgba(255,255,255,0.05);
-            z-index: 100;
-        }
+.sidebar {
+    width: var(--sidebar-width);
+    background: #1e293b;
+    height: 100vh;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
 
-        .sidebar-header {
-            padding: 30px 25px;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            letter-spacing: -0.5px;
-        }
+.sidebar-header {
+    padding: 30px 25px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary);
+}
 
-        .nav-items-container {
-            flex-grow: 1;
-        }
+.nav-items-container { flex-grow: 1; }
 
-        .nav-item {
-            padding: 15px 25px;
-            cursor: pointer;
-            color: #94a3b8;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+.nav-item {
+    padding: 15px 25px;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: 0.2s;
+}
 
-        .nav-item:hover {
-            background: rgba(255,255,255,0.05);
-            color: white;
-        }
+.nav-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: white;
+}
 
-        .nav-item.active {
-            color: var(--primary);
-            border-right: 4px solid var(--primary);
-            background: rgba(0, 245, 212, 0.05);
-        }
+.nav-item.active {
+    color: var(--primary);
+    border-right: 4px solid var(--primary);
+    background: rgba(0,245,212,0.05);
+}
 
-        .logout-container {
-            padding: 20px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
+.logout-container {
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
 
-        .logout-btn {
-            width: 100%;
-            padding: 12px;
-            background: transparent;
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+.logout-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
 
-        .logout-btn:hover {
-            background: var(--danger);
-            color: white;
-            box-shadow: 0 0 15px rgba(255, 77, 77, 0.3);
-        }
+.logout-btn:hover {
+    background: var(--danger);
+    color: white;
+}
 
-        /* Main Content Styling */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 40px;
-            width: calc(100% - var(--sidebar-width));
-            box-sizing: border-box;
-        }
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 40px;
+    width: calc(100% - var(--sidebar-width));
+}
 
-        .view-section { display: none; animation: fadeIn 0.3s ease; }
-        .view-section.active { display: block; }
+.view-section { display: none; }
+.view-section.active { display: block; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.container {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
 
-        .container {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
 
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
+.stat-box {
+    background: rgba(15, 23, 42, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
 
-        .stat-box {
-            background: rgba(15, 23, 42, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
+.stat-box h2 { color: var(--primary); margin: 10px 0 0; }
 
-        .stat-box h2 { color: var(--primary); margin: 10px 0 0 0; font-size: 2rem; }
-        .stat-box h4 { margin: 0; color: #94a3b8; font-weight: 500; text-transform: uppercase; font-size: 0.8rem; }
+input[type="text"], input[type="file"] {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: white;
+}
 
-        input[type="text"], input[type="file"] {
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: #0f172a;
-            color: white;
-        }
+.primary-btn {
+    background: var(--primary);
+    color: #0f172a;
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
 
-        .primary-btn {
-            background: var(--primary);
-            color: #0f172a;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 12px 24px;
-            border-radius: 8px;
-            border: none;
-            transition: transform 0.2s;
-        }
+table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+th { color: var(--primary); }
 
-        .primary-btn:hover { transform: translateY(-2px); opacity: 0.9; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 14px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        th { color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
-        tr:hover { background: rgba(255,255,255,0.02); }
-
-        .loading { color: var(--primary); font-weight: bold; margin-top: 15px; display: block; }
-
-        canvas { max-height: 400px; }
-    </style>
+canvas { max-height: 400px; }
+</style>
 </head>
 
 <body>
 
 <nav class="sidebar">
-    <div class="sidebar-header">HR Intel</div>
-
-    <div class="nav-items-container">
-        <div class="nav-item active" onclick="showView('uploadView', this)">📁 Upload</div>
-        <div class="nav-item" onclick="showView('statsView', this)">📊 Analytics</div>
-        <div class="nav-item" onclick="showView('tableView', this)">👥 Candidates</div>
-        <div class="nav-item" onclick="showView('aiView', this)">🤖 AI Recruiter</div>
-    </div>
-
-    <div class="logout-container">
-        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
-    </div>
+<div class="sidebar-header">HR Intel</div>
+<div class="nav-items-container">
+    <div class="nav-item active" onclick="showView('uploadView', this)">📁 Upload</div>
+    <div class="nav-item" onclick="showView('statsView', this)">📊 Analytics</div>
+    <div class="nav-item" onclick="showView('tableView', this)">👥 Candidates</div>
+    <div class="nav-item" onclick="showView('aiView', this)">🤖 AI Recruiter</div>
+</div>
+<div class="logout-container">
+    <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
 </nav>
 
 <main class="main-content">
 
-    <section id="uploadView" class="view-section active">
-        <h1>Upload Candidate Data</h1>
-        <p style="color: #94a3b8;">Upload a CSV file with columns: Name, Skills, Experience.</p>
-        <div class="container">
-            <input type="file" id="csvFile" accept=".csv">
-            <button class="primary-btn" onclick="loadCSV()">Process Dataset</button>
-        </div>
-    </section>
+<section id="uploadView" class="view-section active">
+<h1>Upload Candidate Data</h1>
+<p>CSV Columns Required:</p>
+<p><b>Name, Skills, Experience, Location, Expected Salary</b></p>
+<div class="container">
+    <input type="file" id="csvFile" accept=".csv">
+    <button class="primary-btn" onclick="loadCSV()">Process Dataset</button>
+</div>
+</section>
 
-    <section id="statsView" class="view-section">
-        <h1>Analytics Dashboard</h1>
-        <div class="grid-3">
-            <div class="stat-box">
-                <h4>Total Candidates</h4>
-                <h2 id="totalCount">0</h2>
-            </div>
-            <div class="stat-box">
-                <h4>Avg Experience</h4>
-                <h2 id="avgExp">0</h2>
-            </div>
-            <div class="stat-box">
-                <h4>Unique Skills</h4>
-                <h2 id="uniqueSkills">0</h2>
-            </div>
-        </div>
+<section id="statsView" class="view-section">
+<h1>Analytics Dashboard</h1>
 
-        <div class="grid-3" style="margin-top: 25px; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
-            <div class="container">
-                <h3 style="color: var(--primary);">Skill Frequency</h3>
-                <canvas id="skillChart"></canvas>
-            </div>
-            <div class="container">
-                <h3 style="color: var(--secondary);">Experience Levels</h3>
-                <canvas id="expDistChart"></canvas>
-            </div>
-        </div>
+<div class="grid-4">
+    <div class="stat-box">
+        <h4>Total Candidates</h4>
+        <h2 id="totalCount">0</h2>
+    </div>
+    <div class="stat-box">
+        <h4>Avg Experience</h4>
+        <h2 id="avgExp">0</h2>
+    </div>
+    <div class="stat-box">
+        <h4>Unique Skills</h4>
+        <h2 id="uniqueSkills">0</h2>
+    </div>
+    <div class="stat-box">
+        <h4>Avg Expected Salary</h4>
+        <h2 id="avgSalary">0</h2>
+    </div>
+</div>
 
-        <div class="container">
-            <h3 style="color: var(--primary);">Top 5 Candidates by Experience</h3>
-            <canvas id="topCandidatesChart"></canvas>
-        </div>
-    </section>
+<div class="container">
+    <h3>Skill Frequency</h3>
+    <canvas id="skillChart"></canvas>
+</div>
 
-    <section id="tableView" class="view-section">
-        <h1>Candidate Database</h1>
-        <div class="container">
-            <div style="overflow-x: auto;">
-                <table id="dataTable"></table>
-            </div>
-        </div>
-    </section>
+<div class="container">
+    <h3>Salary Distribution</h3>
+    <canvas id="salaryChart"></canvas>
+</div>
 
-    <section id="aiView" class="view-section">
-        <h1>AI Powered Recruitment</h1>
-        <div class="container">
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="roleInput" placeholder="Job Role (e.g. Frontend Developer)" style="flex-grow: 1;">
-                <button class="primary-btn" onclick="runAIRecruiter()">Find Matches</button>
-            </div>
-            <span id="loadingText" class="loading"></span>
-        </div>
-        <div class="container">
-            <div style="overflow-x: auto;">
-                <table id="aiResultsTable"></table>
-            </div>
-        </div>
-    </section>
+</section>
+
+<section id="tableView" class="view-section">
+<h1>Candidate Database</h1>
+<div class="container">
+    <table id="dataTable"></table>
+</div>
+</section>
+
+<section id="aiView" class="view-section">
+<h1>AI Recruiter</h1>
+<div class="container">
+    <input type="text" id="roleInput" placeholder="Enter Job Role">
+    <button class="primary-btn" onclick="runAIRecruiter()">Find Matches</button>
+</div>
+<div class="container">
+    <table id="aiResultsTable"></table>
+</div>
+</section>
 
 </main>
 
 <script>
-    let originalData = [];
-    let charts = {};
+let originalData = [];
+let charts = {};
 
-    function showView(id, element) {
-        if(originalData.length === 0 && id !== 'uploadView'){
-            alert("Please upload a CSV file first.");
-            return;
+function showView(id, el){
+    if(originalData.length === 0 && id !== "uploadView"){
+        alert("Upload CSV first");
+        return;
+    }
+    document.querySelectorAll('.view-section').forEach(v=>v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(v=>v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+}
+
+function loadCSV(){
+    const file = document.getElementById("csvFile").files[0];
+    if(!file) return alert("Select CSV file");
+
+    Papa.parse(file,{
+        header:true,
+        dynamicTyping:true,
+        complete:(res)=>{
+            originalData = res.data.filter(r => r.Name);
+            updateDashboard();
+            alert("Loaded " + originalData.length + " candidates");
         }
+    });
+}
 
-        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
+function updateDashboard(){
+    document.getElementById("totalCount").innerText = originalData.length;
 
-        document.getElementById(id).classList.add('active');
-        element.classList.add('active');
-    }
+    const totalExp = originalData.reduce((a,b)=>a+(parseFloat(b.Experience)||0),0);
+    document.getElementById("avgExp").innerText = 
+        (totalExp/(originalData.length||1)).toFixed(1)+" yrs";
 
-    function loadCSV(){
-        const file = document.getElementById("csvFile").files[0];
-        if(!file) return alert("Select CSV file");
+    const totalSalary = originalData.reduce((a,b)=>a+(parseFloat(b["Expected Salary"])||0),0);
+    document.getElementById("avgSalary").innerText = 
+        "₹ "+(totalSalary/(originalData.length||1)).toFixed(2)+" LPA";
 
-        Papa.parse(file,{
-            header:true,
-            dynamicTyping:true,
-            skipEmptyLines: true,
-            complete:(results)=>{
-                originalData = results.data.filter(row => Object.values(row).some(v => v !== null && v !== ""));
-                updateDashboard();
-                alert("Data Loaded: " + originalData.length + " candidates found.");
-            }
-        });
-    }
-
-    function updateDashboard() {
-        // 1. Update Basic Metrics
-        document.getElementById("totalCount").innerText = originalData.length;
-        const totalExp = originalData.reduce((a, b) => a + (parseFloat(b.Experience) || 0), 0);
-        document.getElementById("avgExp").innerText = (totalExp / (originalData.length || 1)).toFixed(1) + " yrs";
-
-        // 2. Process Skills
-        const skillMap = {};
-        originalData.forEach(r => {
-            if (r.Skills) {
-                String(r.Skills).split(",").forEach(s => {
-                    const skill = s.trim();
-                    if(skill) skillMap[skill] = (skillMap[skill] || 0) + 1;
-                });
-            }
-        });
-        document.getElementById("uniqueSkills").innerText = Object.keys(skillMap).length;
-
-        // 3. Experience Levels
-        const expDist = { Junior: 0, Mid: 0, Senior: 0, Expert: 0 };
-        originalData.forEach(r => {
-            const yr = parseFloat(r.Experience) || 0;
-            if (yr <= 2) expDist.Junior++;
-            else if (yr <= 5) expDist.Mid++;
-            else if (yr <= 10) expDist.Senior++;
-            else expDist.Expert++;
-        });
-
-        // 4. Top 5 Candidates
-        const top5 = [...originalData]
-            .sort((a, b) => (parseFloat(b.Experience) || 0) - (parseFloat(a.Experience) || 0))
-            .slice(0, 5);
-
-        // --- RENDER CHARTS ---
-        Object.values(charts).forEach(chart => { if(chart) chart.destroy(); });
-
-        const commonOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: "#94a3b8", font: { family: 'Inter' } } } }
-        };
-
-        // Skill Frequency
-        charts.skill = new Chart(document.getElementById("skillChart"), {
-            type: 'bar',
-            data: {
-                labels: Object.keys(skillMap),
-                datasets: [{ label: 'Candidates', data: Object.values(skillMap), backgroundColor: '#00f5d4' }]
-            },
-            options: { ...commonOptions, scales: {
-                y: { ticks: { color: "#94a3b8" }, grid: { color: "rgba(255,255,255,0.05)" } },
-                x: { ticks: { color: "#94a3b8" }, grid: { display: false } }
-            }}
-        });
-
-        // Experience Doughnut
-        charts.expDist = new Chart(document.getElementById("expDistChart"), {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(expDist),
-                datasets: [{
-                    data: Object.values(expDist),
-                    backgroundColor: ['#9b5de5', '#00f5d4', '#fee440', '#f15bb5'],
-                    borderWidth: 0
-                }]
-            },
-            options: { ...commonOptions, plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } } }
-        });
-
-        // Top 5 Horizontal
-        charts.topCand = new Chart(document.getElementById("topCandidatesChart"), {
-            type: 'bar',
-            data: {
-                labels: top5.map(c => c.Name || 'Unknown'),
-                datasets: [{
-                    label: 'Years of Experience',
-                    data: top5.map(c => parseFloat(c.Experience) || 0),
-                    backgroundColor: '#9b5de5'
-                }]
-            },
-            options: {
-                ...commonOptions,
-                indexAxis: 'y',
-                scales: {
-                    x: { ticks: { color: "#94a3b8" }, grid: { color: "rgba(255,255,255,0.05)" } },
-                    y: { ticks: { color: "#fff" } }
-                }
-            }
-        });
-
-        renderMainTable();
-    }
-
-    function renderMainTable() {
-        const table = document.getElementById("dataTable");
-        if (originalData.length > 0) {
-            const headers = Object.keys(originalData[0]);
-            table.innerHTML = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead>`;
-            table.innerHTML += `<tbody>${originalData.map(r =>
-                `<tr>${headers.map(h => `<td>${r[h] || ''}</td>`).join("")}</tr>`
-            ).join("")}</tbody>`;
-        }
-    }
-
-    async function runAIRecruiter() {
-        const role = document.getElementById("roleInput").value.trim();
-        if (!role) return alert("Enter job role");
-
-        const loading = document.getElementById("loadingText");
-        loading.innerText = "⚡ AI is matching candidates based on role requirements...";
-
-        try {
-            const response = await fetch("https://salary-predictor-backend-lv48.onrender.com/api/match_candidates", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ role: role, candidates: originalData })
+    const skillMap = {};
+    originalData.forEach(r=>{
+        if(r.Skills){
+            r.Skills.split(",").forEach(s=>{
+                const skill = s.trim();
+                if(skill) skillMap[skill] = (skillMap[skill]||0)+1;
             });
+        }
+    });
+    document.getElementById("uniqueSkills").innerText = Object.keys(skillMap).length;
 
-            if (!response.ok) throw new Error("Server error");
-            const data = await response.json();
-            displayAIResults(data.matches || []);
-            loading.innerText = "✅ Analysis complete.";
+    if(charts.skill) charts.skill.destroy();
+    charts.skill = new Chart(document.getElementById("skillChart"),{
+        type:'bar',
+        data:{
+            labels:Object.keys(skillMap),
+            datasets:[{label:"Candidates",data:Object.values(skillMap)}]
         }
-        catch (err) {
-            loading.innerText = "";
-            alert("Error: The AI server might be sleeping. Please try again in 30 seconds.");
+    });
+
+    if(charts.salary) charts.salary.destroy();
+    charts.salary = new Chart(document.getElementById("salaryChart"),{
+        type:'bar',
+        data:{
+            labels:originalData.map(c=>c.Name),
+            datasets:[{
+                label:"Expected Salary (LPA)",
+                data:originalData.map(c=>parseFloat(c["Expected Salary"])||0)
+            }]
         }
+    });
+
+    renderTable();
+}
+
+function renderTable(){
+    const table = document.getElementById("dataTable");
+    if(originalData.length === 0) return;
+
+    const headers = Object.keys(originalData[0]);
+    table.innerHTML = "<tr>"+headers.map(h=>`<th>${h}</th>`).join("")+"</tr>";
+    originalData.forEach(r=>{
+        table.innerHTML += "<tr>"+headers.map(h=>`<td>${r[h]||""}</td>`).join("")+"</tr>";
+    });
+}
+
+async function runAIRecruiter(){
+    const role = document.getElementById("roleInput").value;
+    if(!role) return alert("Enter role");
+
+    const res = await fetch("https://salary-predictor-backend-lv48.onrender.com/api/match_candidates",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({role:role,candidates:originalData})
+    });
+
+    const data = await res.json();
+    displayResults(data.matches||[]);
+}
+
+function displayResults(results){
+    const table = document.getElementById("aiResultsTable");
+    if(results.length===0){
+        table.innerHTML="<tr><td>No matches found</td></tr>";
+        return;
     }
+    const headers = Object.keys(results[0]);
+    table.innerHTML="<tr>"+headers.map(h=>`<th>${h}</th>`).join("")+"</tr>";
+    results.forEach(r=>{
+        table.innerHTML+="<tr>"+headers.map(h=>`<td>${r[h]}</td>`).join("")+"</tr>";
+    });
+}
 
-    function displayAIResults(results) {
-        const table = document.getElementById("aiResultsTable");
-        table.innerHTML = "";
-
-        if (!results || results.length === 0) {
-            table.innerHTML = "<tr><td colspan='100%'>No strong matches found for this role.</td></tr>";
-            return;
-        }
-
-        const headers = Object.keys(results[0]);
-        table.innerHTML = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead>`;
-        table.innerHTML += `<tbody>${results.map(r =>
-            `<tr>${headers.map(h => `<td>${r[h] !== undefined ? r[h] : ''}</td>`).join("")}</tr>`
-        ).join("")}</tbody>`;
-    }
-
-   function logout() {
-       if(confirm("Logout will clear session data. Continue?")) {
-           sessionStorage.clear();   // 🔥 THIS IS THE FIX
-           window.location.href = "index.html";
-       }
-   }
+function logout(){
+    sessionStorage.clear();
+    window.location.href="index.html";
+}
 </script>
 
 </body>
 </html>
-
-
