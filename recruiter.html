@@ -330,7 +330,14 @@ function displayResults(results){
         table.innerHTML="<tr><td>No matches found</td></tr>";
         return;
     }
-    const headers = Object.keys(results[0]);
+    const headers = [
+        "Name",
+        "Skills",
+        "Experience",
+        "Location",
+        "Expected Salary",
+        "match_score"
+    ];
     table.innerHTML="<tr>"+headers.map(h=>`<th>${h}</th>`).join("")+"</tr>";
     results.forEach(r=>{
         table.innerHTML+="<tr>"+headers.map(h=>`<td>${r[h]}</td>`).join("")+"</tr>";
@@ -345,4 +352,5 @@ function logout(){
 
 </body>
 </html>
+
 
