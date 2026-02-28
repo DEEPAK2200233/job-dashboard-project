@@ -314,7 +314,7 @@ async function runAIRecruiter(){
     const role = document.getElementById("roleInput").value;
     if(!role) return alert("Enter role");
 
-    const res = await fetch("https://salary-predictor-backend-lv48.onrender.com/api/match_candidates",{
+    const res = await fetch("https://salary-backend-nixpackspythonversion-310.up.railway.app/api/match_candidates",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({role:role,candidates:originalData})
@@ -345,3 +345,4 @@ function logout(){
 
 </body>
 </html>
+
